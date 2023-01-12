@@ -5,8 +5,7 @@ const sasl =
 const ssl = !!sasl;
 
 const kafka = new Kafka({
-  clientId: "my-app",
+  clientId: "socketManager",
   brokers: ["localhost:9092"],
 });
-
 export { kafka };

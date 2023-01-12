@@ -1,11 +1,10 @@
-import express, { json } from "express";
+import express from "express";
 import { kafka } from "./src/kafka";
+import mongoose from "mongoose";
 import {
   saveSocketUserToDb,
   getSocketUserDetails,
 } from "./src/modules/socketUser/socketUser.controller";
-import mongoose from "mongoose";
-
 mongoose
   .connect(
     "mongodb+srv://hammad:hammad@cluster0.iqsof.mongodb.net/?retryWrites=true&w=majority"
@@ -18,16 +17,16 @@ mongoose
   });
 
 const app = express();
-const PORT: number = Number(process.env.PORT) || 3001;
+const PORT: number = Number(process.env.PORT) || 3009;
 
 (async () => {
   try {
     const consumer = kafka.consumer({
-      groupId: "console-consumer",
+      groupId: "socketManagerConsumer",
     });
     await consumer.connect();
     await consumer.subscribe({
-      topic: "websocketmanager",
+      topic: "websocketusermanager",
     });
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
