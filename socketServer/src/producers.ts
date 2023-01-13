@@ -1,5 +1,4 @@
 import { kafka } from "./kafka";
-const producer = kafka.producer();
 
 interface User {
   userId: string;
@@ -7,9 +6,10 @@ interface User {
   exp?: string;
 }
 async function addUser(socketId: string, user: User) {
+  const producer = kafka.producer();
   await producer.connect();
   await producer.send({
-    topic: "websocketmanager",
+    topic: "websocketusermanager",
     messages: [
       {
         key: "userInfo",
@@ -21,9 +21,10 @@ async function addUser(socketId: string, user: User) {
 }
 
 async function getUserSocketDetails(userId: string) {
+  const producer = kafka.producer();
   await producer.connect();
   await producer.send({
-    topic: "websocketmanager",
+    topic: "websocketusermanager",
     messages: [
       {
         key: "getSocketDetails",

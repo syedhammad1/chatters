@@ -1,5 +1,21 @@
 import express from "express";
 import { kafka } from "./src/kafka";
+const admin = kafka.admin();
+
+const topic = "websocketusermanager";
+const run = async () => {
+  await admin.connect();
+  await admin.createTopics({
+    topics: [{ topic }],
+    waitForLeaders: true,
+  });
+  await admin.createPartitions({
+    topicPartitions: [{ topic: topic, count: 1 }],
+  });
+};
+run().catch((e) =>
+  kafka.logger().error(`[Kafka-config] ${e.message}`, { stack: e.stack })
+);
 import mongoose from "mongoose";
 import {
   saveSocketUserToDb,

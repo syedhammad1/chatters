@@ -1,5 +1,4 @@
 import { kafka } from "./kafka";
-const producer = kafka.producer();
 
 interface User {
   userId: string;

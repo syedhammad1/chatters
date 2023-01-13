@@ -1,5 +1,22 @@
 version: "3"
 services:
+  zookeeper:
+    image: zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafkac
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_ADVERTISED_HOST_NAME=localhost
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_BROKER_ID:1
+      - KAFKA_ADVERTISED_LISTENERS:PLAINTEXT://kafkac:9092,PLAINTEXT_HOST://localhost:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME:PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:2
   nginx:
     image: nginx:stable-alpine
     volumes:
@@ -13,6 +30,13 @@ services:
         NODE_ENV: production
     environment:
       - PORT=5001
+      - KAFKA_ADVERTISED_HOST_NAME=kafka:9092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_INTER_BROKER_LISTENER_NAME:PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:2
+    depends_on:
+      - zookeeper
+      - kafka
     command: npm run dev
     volumes:
       - ./:/usr/src/app
@@ -23,6 +47,13 @@ services:
         NODE_ENV: production
     environment:
       - PORT=5002
+      - KAFKA_ADVERTISED_HOST_NAME=kafka:9092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_INTER_BROKER_LISTENER_NAME:PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:2
+    depends_on:
+      - zookeeper
+      - kafka
     command: npm run dev
     volumes:
       - ./:/usr/src/app
