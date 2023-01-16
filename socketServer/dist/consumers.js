@@ -10,29 +10,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getReturnedSocketUserDetails = void 0;
-const kafka_1 = require("./kafka");
 function getReturnedSocketUserDetails() {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const consumer = kafka_1.kafka.consumer({
-                groupId: "socket-consumer",
-            });
-            yield consumer.connect();
-            yield consumer.subscribe({
-                topic: "socketServer",
-            });
-            yield consumer.run({
-                eachMessage: ({ topic, partition, message }) => __awaiter(this, void 0, void 0, function* () {
-                    var _a, _b;
-                    if (((_a = message.key) === null || _a === void 0 ? void 0 : _a.toString()) === "returnSocketDetails") {
-                        console.log("SOCKET USER ID RETURN FROM WEB SOCKET MANAGER", (_b = message === null || message === void 0 ? void 0 : message.value) === null || _b === void 0 ? void 0 : _b.toString());
-                    }
-                }),
-            });
-        }
-        catch (error) {
-            console.log(error, "Error");
-        }
+        // try {
+        //   const consumer = kafka.consumer({
+        //     groupId: "socket-consumer",
+        //   });
+        //   await consumer.connect();
+        //   await consumer.subscribe({
+        //     topic: "socketServer",
+        //   });
+        //   await consumer.run({
+        //     eachMessage: async ({ topic, partition, message }) => {
+        //       if (message.key?.toString() === "returnSocketDetails") {
+        //         console.log(
+        //           "SOCKET USER ID RETURN FROM WEB SOCKET MANAGER",
+        //           message?.value?.toString()
+        //         );
+        //       }
+        //     },
+        //   });
+        // } catch (error: any) {
+        //   console.log(error, "Error");
+        // }
     });
 }
 exports.getReturnedSocketUserDetails = getReturnedSocketUserDetails;

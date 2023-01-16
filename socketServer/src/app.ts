@@ -1,6 +1,8 @@
 import express from "express";
 import { addUser, getUserSocketDetails } from "./producers";
 import { getReturnedSocketUserDetails } from "./consumers";
+import { client } from "./kafka";
+import kafka from "kafka-node";
 var cors = require("cors");
 const app = express();
 const PORT: number = Number(process.env.PORT) || 4000;
@@ -20,6 +22,10 @@ interface MessagePayload {
 }
 io.use(async (socket: any, next: any) => {
   try {
+    // const created = await kafka.admin().createTopics({
+    //   topics: [{ topic: "macarena", numPartitions: 1, replicationFactor: 1 }],
+    // });
+    // console.log(created, "CREATEDDDDDDDDDDdd");
     // let data = await jwtVerify(socket.handshake.auth.token, jwtSecret);
     let data: User = { userId: new Date().getTime().toString(), iat: "0" };
     if (!data) return next(new Error("Authentication Error"));
@@ -40,16 +46,28 @@ io.use(async (socket: any, next: any) => {
   //   return next(new Error("Authentication Error"));
   // }
 });
-
+// const consumer = new kafka.Consumer(
+//   client,
+//   [{ topic: "websocketusermanager" }],
+//   {
+//     groupId: "1",
+//   }
+// );
+// consumer.on("error", async function (msg) {
+//   console.log(msg);
+// });
+// consumer.on("message", async function (message) {
+//   console.log(message, "THOS MESSAGE RECEIVED");
+// });
 const onConnection = async (socket: any) => {
   addUser(socket.id, socket.user);
-  console.log("USER CONNECTED TO SERVER PORT", process.env.PORT, socket.id);
-  socket.on("send_message", (payload: MessagePayload) => {
-    let { userId, message } = payload;
-    console.log(payload);
-    getUserSocketDetails(userId);
-    getReturnedSocketUserDetails();
-  });
+  // console.log("USER CONNECTED TO SERVER PORT", process.env.PORT, socket.id);
+  // socket.on("send_message", (payload: MessagePayload) => {
+  //   let { userId, message } = payload;
+  //   console.log(payload);
+  //   getUserSocketDetails(userId);
+  //   getReturnedSocketUserDetails();
+  // });
 
   socket.on("disconnect", () => {});
 

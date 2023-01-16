@@ -1,22 +1,7 @@
 import express from "express";
-import { kafka } from "./src/kafka";
-const admin = kafka.admin();
-
-const topic = "websocketusermanager";
-const run = async () => {
-  await admin.connect();
-  await admin.createTopics({
-    topics: [{ topic }],
-    waitForLeaders: true,
-  });
-  await admin.createPartitions({
-    topicPartitions: [{ topic: topic, count: 1 }],
-  });
-};
-run().catch((e) =>
-  kafka.logger().error(`[Kafka-config] ${e.message}`, { stack: e.stack })
-);
+import { client } from "./src/kafka";
 import mongoose from "mongoose";
+import kafka from "kafka-node";
 import {
   saveSocketUserToDb,
   getSocketUserDetails,
@@ -37,25 +22,41 @@ const PORT: number = Number(process.env.PORT) || 3009;
 
 (async () => {
   try {
-    const consumer = kafka.consumer({
-      groupId: "socketManagerConsumer",
+    // const consumer = new kafka.Consumer(client, [
+    //   { topic: "test_topic", partition: 0 }
+    // ]);
+
+    const consumer = new kafka.Consumer(
+      client,
+      [{ topic: "websocketusermanager" }],
+      { fromOffset: true }
+    );
+    consumer.on("error", async function (msg) {
+      console.log(msg);
     });
-    await consumer.connect();
-    await consumer.subscribe({
-      topic: "websocketusermanager",
+    consumer.on("message", async function (message) {
+      console.log(message, "THOS MESSAGE RECEIVED");
     });
-    await consumer.run({
-      eachMessage: async ({ topic, partition, message }) => {
-        if (message.key?.toString() === "userInfo") {
-          let userData = message.value
-            ? JSON.parse(message.value.toString())
-            : undefined;
-          saveSocketUserToDb(userData);
-        } else if (message.key?.toString() === "getSocketDetails") {
-          getSocketUserDetails(message.value);
-        }
-      },
-    });
+
+    // const consumer = kafka.consumer({
+    //   groupId: "socketManagerConsumer",
+    // });
+    // await consumer.connect();
+    // await consumer.subscribe({
+    //   topic: "websocketusermanager",
+    // });
+    // await consumer.run({
+    //   eachMessage: async ({ topic, partition, message }) => {
+    //     if (message.key?.toString() === "userInfo") {
+    //       let userData = message.value
+    //         ? JSON.parse(message.value.toString())
+    //         : undefined;
+    //       saveSocketUserToDb(userData);
+    //     } else if (message.key?.toString() === "getSocketDetails") {
+    //       getSocketUserDetails(message.value);
+    //     }
+    //   },
+    // });
   } catch (error: any) {
     console.log(error, "Error");
   }
