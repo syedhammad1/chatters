@@ -16,6 +16,8 @@ const express_1 = __importDefault(require("express"));
 const kafka_1 = require("./src/kafka");
 const mongoose_1 = __importDefault(require("mongoose"));
 const kafka_node_1 = __importDefault(require("kafka-node"));
+const user_routes_1 = __importDefault(require("./src/modules/user/user.routes"));
+const cors_1 = __importDefault(require("cors"));
 const socketUser_controller_1 = require("./src/modules/socketUser/socketUser.controller");
 mongoose_1.default
     .connect("mongodb+srv://hammad:hammad@cluster0.iqsof.mongodb.net/?retryWrites=true&w=majority")
@@ -57,6 +59,9 @@ const PORT = Number(process.env.PORT) || 3009;
         console.log(error, "Error");
     }
 }))();
+app.use((0, cors_1.default)({ origin: "*" }));
+app.use(express_1.default.json());
+app.use("/users", user_routes_1.default);
 app.listen(PORT, function () {
     console.log("listening on *:", PORT);
 });

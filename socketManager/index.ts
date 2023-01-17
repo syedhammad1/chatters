@@ -2,6 +2,8 @@ import express from "express";
 import { client } from "./src/kafka";
 import mongoose from "mongoose";
 import kafka from "kafka-node";
+import userRoutes from "./src/modules/user/user.routes";
+import cors from "cors";
 import {
   saveSocketUserToDb,
   getSocketUserDetails,
@@ -16,7 +18,6 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-
 const app = express();
 const PORT: number = Number(process.env.PORT) || 3009;
 
@@ -46,7 +47,9 @@ const PORT: number = Number(process.env.PORT) || 3009;
     console.log(error, "Error");
   }
 })();
-
+app.use(cors({ origin: "*" }));
+app.use(express.json());
+app.use("/users", userRoutes);
 app.listen(PORT, function () {
   console.log("listening on *:", PORT);
 });

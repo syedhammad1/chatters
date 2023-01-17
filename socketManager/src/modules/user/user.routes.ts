@@ -1,8 +1,8 @@
 import express from "express";
-// import { saveSocketUserToDb } from "./user.controller";
+import { create } from "./user.controller";
 
 const router = express.Router();
 
-// router.get("/", saveSocketUserToDb);
+router.post("/create", create);
 
 export default router;

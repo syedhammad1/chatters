@@ -30,7 +30,7 @@ function getReturnedSocketUserDetails(io, userMessage) {
             return __awaiter(this, void 0, void 0, function* () {
                 message.value = JSON.parse(message.value);
                 if (((_a = message === null || message === void 0 ? void 0 : message.key) === null || _a === void 0 ? void 0 : _a.toString()) === "returnSocketDetails") {
-                    io.to(message.value.socketId).emit("getMessage", {
+                    io.to(message.value.socketId).emit("sendMessage", {
                         message: userMessage,
                     });
                     return message.value.socketId;

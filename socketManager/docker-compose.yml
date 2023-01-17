@@ -13,6 +13,8 @@ services:
       - KAFKA_INTER_BROKER_LISTENER_NAME:PLAINTEXT
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:2
     command: npm run dev
+    ports:
+      - 3009:3009
     volumes:
       - ./:/usr/src/app
 networks:

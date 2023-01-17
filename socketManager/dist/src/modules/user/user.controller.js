@@ -12,9 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addUser = void 0;
+exports.create = void 0;
 const user_model_1 = __importDefault(require("./user.model"));
-const addUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let user = yield user_model_1.default.create({});
+const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //check user
+    let userExists = yield user_model_1.default.findOne({ email: req.body.email });
+    if (!userExists) {
+        let user = yield user_model_1.default.create(req.body);
+    }
+    res.json("Created Successfully");
 });
-exports.addUser = addUser;
+exports.create = create;
