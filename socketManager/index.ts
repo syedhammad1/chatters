@@ -22,41 +22,26 @@ const PORT: number = Number(process.env.PORT) || 3009;
 
 (async () => {
   try {
-    // const consumer = new kafka.Consumer(client, [
-    //   { topic: "test_topic", partition: 0 }
-    // ]);
-
     const consumer = new kafka.Consumer(
       client,
       [{ topic: "websocketusermanager" }],
-      { fromOffset: true }
+      { encoding: "utf8" }
     );
     consumer.on("error", async function (msg) {
       console.log(msg);
     });
-    consumer.on("message", async function (message) {
-      console.log(message, "THOS MESSAGE RECEIVED");
+    consumer.on("message", async function (message: any) {
+      try {
+        message.value = JSON.parse(message.value);
+      } catch (err) {
+        message.value = message.value;
+      }
+      if (message?.value?.topic?.toString() === "userInfo") {
+        saveSocketUserToDb(message.value);
+      } else if (message?.key?.toString() === "getSocketDetails") {
+        getSocketUserDetails(message.value);
+      }
     });
-
-    // const consumer = kafka.consumer({
-    //   groupId: "socketManagerConsumer",
-    // });
-    // await consumer.connect();
-    // await consumer.subscribe({
-    //   topic: "websocketusermanager",
-    // });
-    // await consumer.run({
-    //   eachMessage: async ({ topic, partition, message }) => {
-    //     if (message.key?.toString() === "userInfo") {
-    //       let userData = message.value
-    //         ? JSON.parse(message.value.toString())
-    //         : undefined;
-    //       saveSocketUserToDb(userData);
-    //     } else if (message.key?.toString() === "getSocketDetails") {
-    //       getSocketUserDetails(message.value);
-    //     }
-    //   },
-    // });
   } catch (error: any) {
     console.log(error, "Error");
   }

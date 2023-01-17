@@ -8,31 +8,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getReturnedSocketUserDetails = void 0;
-function getReturnedSocketUserDetails() {
+const kafka_1 = require("./kafka");
+const kafka_node_1 = __importDefault(require("kafka-node"));
+function getReturnedSocketUserDetails(io, userMessage) {
     return __awaiter(this, void 0, void 0, function* () {
-        // try {
-        //   const consumer = kafka.consumer({
-        //     groupId: "socket-consumer",
-        //   });
-        //   await consumer.connect();
-        //   await consumer.subscribe({
-        //     topic: "socketServer",
-        //   });
-        //   await consumer.run({
-        //     eachMessage: async ({ topic, partition, message }) => {
-        //       if (message.key?.toString() === "returnSocketDetails") {
-        //         console.log(
-        //           "SOCKET USER ID RETURN FROM WEB SOCKET MANAGER",
-        //           message?.value?.toString()
-        //         );
-        //       }
-        //     },
-        //   });
-        // } catch (error: any) {
-        //   console.log(error, "Error");
-        // }
+        const consumer = new kafka_node_1.default.Consumer(kafka_1.client, [{ topic: "socketServer" }], {
+            encoding: "utf8",
+        });
+        consumer.on("error", function (msg) {
+            return __awaiter(this, void 0, void 0, function* () {
+                console.log(msg);
+            });
+        });
+        consumer.on("message", function (message) {
+            var _a;
+            return __awaiter(this, void 0, void 0, function* () {
+                message.value = JSON.parse(message.value);
+                if (((_a = message === null || message === void 0 ? void 0 : message.key) === null || _a === void 0 ? void 0 : _a.toString()) === "returnSocketDetails") {
+                    io.to(message.value.socketId).emit("getMessage", {
+                        message: userMessage,
+                    });
+                    return message.value.socketId;
+                }
+            });
+        });
     });
 }
 exports.getReturnedSocketUserDetails = getReturnedSocketUserDetails;

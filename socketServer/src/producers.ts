@@ -8,30 +8,17 @@ interface User {
 async function addUser(socketId: string, user: User) {
   const client = new kafka.KafkaClient({ kafkaHost: "kafkac:9092" });
   const producer = new kafka.Producer(client);
-  const payload = [{ topic: "websocketusermanager", messages: "Test message" }];
-  // const producer = kafka.producer();
-  // await producer.connect();
-  // await payload.send({
-  //   topic: "websocketusermanager",
-  //   messages: [
-  //     {
-  //       key: "userInfo",
-  //       value: JSON.stringify({ userId: user?.userId, socketId: socketId }),
-  //     },
-  //   ],
-  // });
-  // Create topics sync
-  // producer.createTopics(
-  //   ["websocketusermanager", "socketServer"],
-  //   false,
-  //   function (err, data) {
-  //     console.log(data, "CREATED");
-  //   }
-  // );
+  let KeyedMessage = kafka.KeyedMessage;
+  let message = { topic: "userInfo", socketId, user };
+  let km = new KeyedMessage("userInfo", JSON.stringify(message));
+  const payload = [
+    {
+      topic: "websocketusermanager",
+      messages: [km],
+    },
+  ];
   producer.on("ready", function () {
-    console.log("READY");
     producer.send(payload, function (error, result) {
-      console.log("Sending payload to Kafka");
       if (error) {
         console.log("Sending payload failed: ", error);
       } else {
@@ -40,24 +27,33 @@ async function addUser(socketId: string, user: User) {
     });
   });
   producer.on("error", function (err) {
-    console.log(err, "SHOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+    console.log(err);
   });
-  // await producer.disconnect();
 }
 
 async function getUserSocketDetails(userId: string) {
-  // const producer = kafka.producer();
-  // await producer.connect();
-  // await producer.send({
-  //   topic: "websocketusermanager",
-  //   messages: [
-  //     {
-  //       key: "getSocketDetails",
-  //       value: userId,
-  //     },
-  //   ],
-  // });
-  // await producer.disconnect();
+  const client = new kafka.KafkaClient({ kafkaHost: "kafkac:9092" });
+  const producer = new kafka.Producer(client);
+  let KeyedMessage = kafka.KeyedMessage;
+  let km = new KeyedMessage("getSocketDetails", userId);
+  const payload = [
+    {
+      topic: "websocketusermanager",
+      messages: [km],
+    },
+  ];
+  producer.on("ready", function () {
+    producer.send(payload, function (error, result) {
+      if (error) {
+        console.log("Sending payload failed: ", error);
+      } else {
+        console.log("Sending payload result:", result);
+      }
+    });
+  });
+  producer.on("error", function (err) {
+    console.log(err);
+  });
 }
 
 export { addUser, getUserSocketDetails };

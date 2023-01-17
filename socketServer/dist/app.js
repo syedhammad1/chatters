@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const producers_1 = require("./producers");
+const consumers_1 = require("./consumers");
 var cors = require("cors");
 const app = (0, express_1.default)();
 const PORT = Number(process.env.PORT) || 4000;
@@ -22,10 +23,6 @@ let http = require("http").Server(app);
 let io = require("socket.io")(http);
 io.use((socket, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // const created = await kafka.admin().createTopics({
-        //   topics: [{ topic: "macarena", numPartitions: 1, replicationFactor: 1 }],
-        // });
-        // console.log(created, "CREATEDDDDDDDDDDdd");
         // let data = await jwtVerify(socket.handshake.auth.token, jwtSecret);
         let data = { userId: new Date().getTime().toString(), iat: "0" };
         if (!data)
@@ -43,33 +40,14 @@ io.use((socket, next) => __awaiter(void 0, void 0, void 0, function* () {
         console.log("[*] Index.js Error", error.message);
         return next(new Error("Authentication Error"));
     }
-    // } else {
-    //   console.log("[*] Token not found.");
-    //   return next(new Error("Authentication Error"));
-    // }
 }));
-// const consumer = new kafka.Consumer(
-//   client,
-//   [{ topic: "websocketusermanager" }],
-//   {
-//     groupId: "1",
-//   }
-// );
-// consumer.on("error", async function (msg) {
-//   console.log(msg);
-// });
-// consumer.on("message", async function (message) {
-//   console.log(message, "THOS MESSAGE RECEIVED");
-// });
 const onConnection = (socket) => __awaiter(void 0, void 0, void 0, function* () {
     (0, producers_1.addUser)(socket.id, socket.user);
-    // console.log("USER CONNECTED TO SERVER PORT", process.env.PORT, socket.id);
-    // socket.on("send_message", (payload: MessagePayload) => {
-    //   let { userId, message } = payload;
-    //   console.log(payload);
-    //   getUserSocketDetails(userId);
-    //   getReturnedSocketUserDetails();
-    // });
+    socket.on("send_message", (payload) => __awaiter(void 0, void 0, void 0, function* () {
+        let { userId, message } = payload;
+        (0, producers_1.getUserSocketDetails)(userId);
+        (0, consumers_1.getReturnedSocketUserDetails)(io, message);
+    }));
     socket.on("disconnect", () => { });
     socket.on("connect_error", (err) => {
         console.log(err.message);

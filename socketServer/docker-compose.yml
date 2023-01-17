@@ -71,3 +71,7 @@ services:
     command: npm run dev
     volumes:
       - ./:/usr/src/app
+networks:
+  default:
+    external:
+      name: external-example

@@ -1,0 +1,21 @@
+version: "3"
+services:
+  servermanagercontainer:
+    build:
+      context: .
+      args:
+        NODE_ENV: production
+    environment:
+      - PORT=3009
+      - KAFKA_ADVERTISED_HOST_NAME=kafkac:9092
+      - KAFKA_ADVERTISED_PORT:9092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_INTER_BROKER_LISTENER_NAME:PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:2
+    command: npm run dev
+    volumes:
+      - ./:/usr/src/app
+networks:
+  default:
+    external:
+      name: external-example

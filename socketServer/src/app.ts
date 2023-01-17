@@ -22,10 +22,6 @@ interface MessagePayload {
 }
 io.use(async (socket: any, next: any) => {
   try {
-    // const created = await kafka.admin().createTopics({
-    //   topics: [{ topic: "macarena", numPartitions: 1, replicationFactor: 1 }],
-    // });
-    // console.log(created, "CREATEDDDDDDDDDDdd");
     // let data = await jwtVerify(socket.handshake.auth.token, jwtSecret);
     let data: User = { userId: new Date().getTime().toString(), iat: "0" };
     if (!data) return next(new Error("Authentication Error"));
@@ -41,36 +37,17 @@ io.use(async (socket: any, next: any) => {
     console.log("[*] Index.js Error", error.message);
     return next(new Error("Authentication Error"));
   }
-  // } else {
-  //   console.log("[*] Token not found.");
-  //   return next(new Error("Authentication Error"));
-  // }
 });
-// const consumer = new kafka.Consumer(
-//   client,
-//   [{ topic: "websocketusermanager" }],
-//   {
-//     groupId: "1",
-//   }
-// );
-// consumer.on("error", async function (msg) {
-//   console.log(msg);
-// });
-// consumer.on("message", async function (message) {
-//   console.log(message, "THOS MESSAGE RECEIVED");
-// });
+
 const onConnection = async (socket: any) => {
   addUser(socket.id, socket.user);
-  // console.log("USER CONNECTED TO SERVER PORT", process.env.PORT, socket.id);
-  // socket.on("send_message", (payload: MessagePayload) => {
-  //   let { userId, message } = payload;
-  //   console.log(payload);
-  //   getUserSocketDetails(userId);
-  //   getReturnedSocketUserDetails();
-  // });
+  socket.on("send_message", async (payload: MessagePayload) => {
+    let { userId, message } = payload;
+    getUserSocketDetails(userId);
+    getReturnedSocketUserDetails(io, message);
+  });
 
   socket.on("disconnect", () => {});
-
   socket.on("connect_error", (err: any) => {
     console.log(err.message);
   });

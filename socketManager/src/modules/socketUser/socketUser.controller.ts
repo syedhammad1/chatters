@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import SocketUserModel from "./socketUser.model";
-import { kafka } from "../../kafka";
-const producer = kafka.producer();
+import { client } from "../../kafka";
+import kafka from "kafka-node";
 const saveSocketUserToDb = async (userData?: any) => {
   // if user already present update it or create a new one
   let socketUser = await SocketUserModel.findOneAndUpdate(
-    { userId: userData.userId },
+    { userId: userData.user.userId },
     {
       socketId: userData.socketId,
-      userId: userData.userId,
+      userId: userData.user.userId,
     },
     { upsert: true }
   );
@@ -19,21 +19,28 @@ const getSocketUserDetails = async (userId: any) => {
   let socketUser = await SocketUserModel.findOne({
     _id: userId,
   });
-  console.log(
-    socketUser,
-    "socketUsersocketUsersocketUsersocketUsersocketUsersocketUsersocketUsersocketUser"
-  );
-  await producer.connect();
-  await producer.send({
-    topic: "socketServer",
-    messages: [
-      {
-        key: "returnSocketDetails",
-        value: JSON.stringify(socketUser?.socketId?.toString()),
-      },
-    ],
+  const client = new kafka.KafkaClient({ kafkaHost: "kafkac:9092" });
+  const producer = new kafka.Producer(client);
+
+  let KeyedMessage = kafka.KeyedMessage;
+  let km = new KeyedMessage("returnSocketDetails", JSON.stringify(socketUser));
+  const payload = [
+    {
+      topic: "socketServer",
+      messages: [km],
+    },
+  ];
+  producer.on("ready", function () {
+    producer.send(payload, function (error, result) {
+      if (error) {
+        console.log("Sending payload failed: ", error);
+      } else {
+        console.log("Sending payload result:", result);
+      }
+    });
   });
-  await producer.disconnect();
-  // return socketUser;
+  producer.on("error", function (err) {
+    console.log(err);
+  });
 };
 export { saveSocketUserToDb, getSocketUserDetails };
